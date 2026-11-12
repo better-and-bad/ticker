@@ -1,0 +1,63 @@
+<div class="ticker" id="ticker" role="marquee" aria-label="better&amp;bad ticker"><div class="wrap" id="wrap"></div></div>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+html, body { margin: 0; background: #f5f0e8; }
+.ticker { width: 100%; overflow: hidden; background: #f5f0e8; padding: 8px 0; font-family: 'Nunito', sans-serif; color: #1a1a1a; }
+.wrap { display: flex; width: max-content; animation: scroll var(--dur, 60s) linear infinite; }
+.ticker:hover .wrap { animation-play-state: paused; }
+.item { display: flex; flex-direction: column; padding: 0 22px; border-right: 1px solid #e8e0d0; white-space: nowrap; line-height: 1.3; color: inherit; text-decoration: none; }
+.label { font-size: 12px; font-weight: 700; color: #666; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; box-sizing: border-box; }
+.dot.better { background: #10b981; }
+.dot.bad { background: transparent; border: 2px solid #f97316; }
+.dot.neutral { background: #d6ccbb; width: 5px; height: 5px; }
+.val { font-size: 17px; font-weight: 800; }
+.chg { font-size: 13px; font-weight: 700; margin-left: 6px; }
+.meta { font-size: 11px; color: #666; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .wrap { animation: none; } .ticker { overflow-x: auto; } }
+</style>
+<script>
+  // Data arrives from the page code (Ticker CMS collection) via postMessage.
+  // If nothing arrives within 4s, fall back to ticker.json on GitHub.
+  var FALLBACK = 'https://raw.githubusercontent.com/better-and-bad/ticker/main/ticker.json';
+  var rendered = false;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function arrow(chg) { return /^\+/.test(chg) ? '▲ ' : /^-/.test(chg) ? '▼ ' : ''; }
+
+  function render(items) {
+    if (!items || !items.length) return;
+    rendered = true;
+    var html = items.map(function (d) {
+      var tag = d.tag || 'neutral';
+      var tagWord = tag === 'better' ? 'Better' : tag === 'bad' ? 'Worse' : '';
+      var meta = (d.secondary ? d.secondary + ' · ' : '') + d.asOf + ' · ' + d.source + (d.status === 'stale' ? ' · latest available' : '');
+      return '<a class="item" href="' + esc(d.url) + '" target="_blank" rel="noopener">' +
+        '<span class="label"><span class="dot ' + esc(tag) + '" aria-hidden="true"></span>' + esc(d.label) +
+        (tagWord ? '<span class="sr"> (' + tagWord + ')</span>' : '') + '</span>' +
+        '<span><span class="val">' + esc(d.display) + '</span>' +
+        (d.change ? '<span class="chg">' + arrow(d.change) + esc(d.change) + ' ' + esc(d.changeLabel) + '</span>' : '') + '</span>' +
+        '<span class="meta">' + esc(meta) + '</span></a>';
+    }).join('');
+    var wrap = document.getElementById('wrap');
+    wrap.innerHTML = html + html; // doubled for a seamless loop
+    wrap.style.setProperty('--dur', Math.max(30, items.length * 7) + 's');
+  }
+
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.ticker) render(e.data.ticker);
+  });
+  window.parent.postMessage('ticker-ready', '*');
+
+  setTimeout(function () {
+    if (rendered) return;
+    fetch(FALLBACK).then(function (r) { return r.json(); }).then(function (j) {
+      render(j.indicators.filter(function (d) { return d.on_ticker && d.status !== 'needs_review'; }).map(function (d) {
+        return { label: d.label, display: d.display, secondary: d.secondary, change: d.change_display, changeLabel: d.change_label,
+                 tag: d.tag, asOf: d.as_of_label, source: d.source, url: d.source_url, status: d.status };
+      }));
+    }).catch(function () {});
+  }, 4000);
+</script>

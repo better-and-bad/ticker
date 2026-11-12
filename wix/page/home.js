@@ -1,37 +1,36 @@
-// Home page code: renders the ticker strip from the Ticker collection.
-// Editor setup: a repeater #tickerRepeater with these elements in each item:
-//   #tickerLabel (text), #tickerValue (text), #tickerChange (text),
-//   #tickerAsOf (text), #tickerDot (small circle box)
+// Home page code: sends the Ticker CMS rows to the ticker HTML embed (#tickerEmbed).
+// The embed (wix/embed/ticker-embed.html) renders them as the scrolling strip.
 
 import wixData from 'wix-data';
 
-const DOT = { better: '#10b981', bad: '#f97316', neutral: '#e8e0d0' };
-const ARROW = { better: '▲ ', bad: '▼ ', neutral: '' }; // shape, not just color
+let items = [];
 
 $w.onReady(async function () {
-  const { items } = await wixData.query('Ticker')
+  const embed = $w('#tickerEmbed');
+
+  // The embed says "ticker-ready" once loaded; answer with the data
+  embed.onMessage((event) => {
+    if (event.data === 'ticker-ready' && items.length) embed.postMessage({ ticker: items });
+  });
+
+  const { items: rows } = await wixData.query('Ticker')
     .eq('showOnTicker', true)
     .ne('status', 'needs_review')
     .ascending('sortOrder')
     .find();
 
-  if (items.length === 0) {
-    $w('#tickerRepeater').collapse();
-    return;
-  }
+  items = rows.map((d) => ({
+    label: d.label,
+    display: d.overrideDisplay || d.display,
+    secondary: d.secondary,
+    change: d.changeDisplay,
+    changeLabel: d.changeLabel,
+    tag: d.tag,
+    asOf: d.asOfLabel,
+    source: d.source,
+    url: d.sourceUrl,
+    status: d.status,
+  }));
 
-  $w('#tickerRepeater').onItemReady(($item, d) => {
-    $item('#tickerLabel').text = d.label;
-    $item('#tickerValue').text = d.overrideDisplay || d.display;
-    $item('#tickerChange').text = d.changeDisplay
-      ? `${ARROW[d.tag] || ''}${d.changeDisplay} ${d.changeLabel}`
-      : '';
-    // Show the data period on every item; flag late data plainly
-    $item('#tickerAsOf').text = d.status === 'stale'
-      ? `${d.asOfLabel} · latest available · ${d.source}`
-      : `${d.asOfLabel} · ${d.source}`;
-    $item('#tickerDot').style.backgroundColor = DOT[d.tag] || DOT.neutral;
-  });
-
-  $w('#tickerRepeater').data = items;
+  embed.postMessage({ ticker: items });
 });
