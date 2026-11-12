@@ -417,6 +417,9 @@ prev_by_id <- setNames(prev, vapply(prev, function(p) p$id, character(1)))
 is_better <- function(spec, value, change) {
   if (is.na(spec$good_direction)) return(NA)
   x <- if (spec$better_basis == "value") value else change
+  # Judge on the rounded number people see, so "0.0 yrs" is neutral, not "better"
+  digits <- switch(spec$change_fmt, pts2 = 2, count_k = 0, 1)
+  if (spec$better_basis == "change" && !is.na(x)) x <- round(x, digits)
   if (is.na(x) || x == 0) return(NA)
   (x > 0) == (spec$good_direction == "up")
 }
