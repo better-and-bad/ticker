@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T23:25:49Z",
+  "generated_at": "2026-11-17T22:28:02Z",
   "indicators": [
     {
       "id": "unemployment",
@@ -229,11 +229,11 @@
       "change_label": "vs. a year ago",
       "is_better": null,
       "tag": "neutral",
-      "as_of": "2026-11-16",
-      "as_of_label": "Nov 16, 2026",
+      "as_of": "2026-11-17",
+      "as_of_label": "Nov 17, 2026",
       "frequency": "daily",
       "status": "ok",
-      "last_updated": "2026-11-16T23:25:49Z",
+      "last_updated": "2026-11-17T22:28:02Z",
       "source": "Federal Reserve via FRED",
       "source_url": "https://fred.stlouisfed.org/series/DFEDTARU",
       "series": "DFEDTARL, DFEDTARU",
