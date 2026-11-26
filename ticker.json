@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T23:08:56Z",
+  "generated_at": "2026-11-26T23:02:35Z",
   "indicators": [
     {
       "id": "unemployment",
@@ -229,11 +229,11 @@
       "change_label": "vs. a year ago",
       "is_better": null,
       "tag": "neutral",
-      "as_of": "2026-11-25",
-      "as_of_label": "Nov 25, 2026",
+      "as_of": "2026-11-26",
+      "as_of_label": "Nov 26, 2026",
       "frequency": "daily",
       "status": "ok",
-      "last_updated": "2026-11-25T23:08:56Z",
+      "last_updated": "2026-11-26T23:02:35Z",
       "source": "Federal Reserve via FRED",
       "source_url": "https://fred.stlouisfed.org/series/DFEDTARU",
       "series": "DFEDTARL, DFEDTARU",
@@ -376,7 +376,7 @@
       "as_of": "2024-01-01",
       "as_of_label": "2024",
       "frequency": "annual",
-      "status": "held",
+      "status": "ok",
       "last_updated": "2026-11-12T17:44:44Z",
       "source": "UN IGME via World Bank",
       "source_url": "https://data.worldbank.org/indicator/SH.DYN.MORT",
